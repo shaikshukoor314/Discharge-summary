@@ -1,0 +1,54 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Output files (optional - remove if you want to track them)
+output/*.json
+output/*.txt
+
+# Re-identification output files (generated files)
+reidentification/output/*.txt
+reidentification/output/*.json
+# Keep .gitkeep file tracked
+!reidentification/output/.gitkeep
+
+# API Keys (if stored locally)
+.env
+*.key
+
+
