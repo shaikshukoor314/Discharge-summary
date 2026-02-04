@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: ds_app_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Manojkumar@c1
+      POSTGRES_DB: Hospital_records
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ds_app_network
+
+  # MinIO Storage
+  minio:
+    image: minio/minio:latest
+    container_name: ds_app_minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/minio_data
+    command: server /minio_data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ds_app_network
+
+  # Redis (for Celery)
+  redis:
+    image: redis:7-alpine
+    container_name: ds_app_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ds_app_network
+
+  # FastAPI Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ds_app_api
+    environment:
+      # Database Configuration
+      DATABASE_URL: postgresql+asyncpg://postgres:Manojkumar@c1@postgres:5432/Hospital_records
+      
+      # MinIO Configuration
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_SECURE: "false"
+      MINIO_BUCKET: medical-docs
+      
+      # Redis/Celery Configuration
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      
+      # OCR Configuration
+      CHANDRA_OCR_URL: http://101.53.140.70:8080
+      OCR_MAX_TOKENS: 7000
+      
+      # Application Settings
+      APP_ENV: production
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      
+      # Feature Flags
+      SPELLCHECK_ENABLED: "true"
+      DEID_ENABLED: "true"
+      DEID_USE_ENSEMBLE: "true"
+      PIPELINE_CLEANUP_ON_NEW_RUN: "true"
+      
+      # API Keys (update with your actual keys)
+      GROQ_API_KEY: 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
+    
+    ports:
+      - "8000:8000"
+    
+    volumes:
+      - ./pipeline_outputs:/app/pipeline_outputs
+      - ./output:/app/output
+    
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    
+    networks:
+      - ds_app_network
+    
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  minio_data:
+  redis_data:
+
+networks:
+  ds_app_network:
+    driver: bridge

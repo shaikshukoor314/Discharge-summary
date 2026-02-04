@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+ENV/
+env.bak/
+venv.bak/
+Ensemble_DEID/venv/
+
+# Environment variables
+.env
+Backend-API-DS/.env
+
+# Local Pipeline Outputs
+pipeline_outputs/
+Ensemble_DEID/output/
+Ensemble_DEID/LLM_input.txt
+Ensemble_DEID/LLM_output.txt
+Ensemble_DEID/Ocr_output.md
+Ensemble_DEID/stanford_output.json
+Ensemble_DEID/ensemble_entities.json
+
+# Database
+*.db
+*.sqlite
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
